@@ -237,7 +237,7 @@ public class ExtensionContext extends FREContext {
                                 _billingManager = new BillingManagerV4(billingClient);
                             }
                             else {
-                                Log.d(TAG, "BillingClient supports PRODUCT_DETAILS, using BillingManagerV5");
+                                Log.d(TAG, "BillingClient supports PRODUCT_DETAILS, using BillingManagerV6");
                                 _billingManager = new BillingManagerV5(billingClient);
                             }
 

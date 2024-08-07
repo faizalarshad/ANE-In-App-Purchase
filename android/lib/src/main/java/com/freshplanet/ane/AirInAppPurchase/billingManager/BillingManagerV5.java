@@ -35,7 +35,7 @@ public class BillingManagerV5 implements IBillingManager {
 
     private boolean _debugLog = false;
     private boolean _disposed = false;
-    private String _debugTag = "BillingManagerV5";
+    private String _debugTag = "BillingManagerV6";
     private BillingClient _billingClient;
 
     private interface QueryPurchasesInternalListener {

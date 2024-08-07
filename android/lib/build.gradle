@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.billingclient:billing:5.2.0'
+    implementation 'com.android.billingclient:billing:6.2.1'
 }
 
 android {
@@ -14,8 +14,12 @@ android {
     buildToolsVersion '31.0.0'
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 31
+        minSdkVersion 19
+        targetSdkVersion 33
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
