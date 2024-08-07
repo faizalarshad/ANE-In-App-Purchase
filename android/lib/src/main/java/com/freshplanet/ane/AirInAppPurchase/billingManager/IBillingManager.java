@@ -2,6 +2,7 @@ package com.freshplanet.ane.AirInAppPurchase.billingManager;
 
 import android.app.Activity;
 
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.ConsumeResponseListener;
 import com.android.billingclient.api.Purchase;
 
@@ -19,6 +20,7 @@ public interface IBillingManager {
     void queryPurchaseHistory(final QueryPurchasesFinishedListener listener);
     void queryPurchases(final QueryPurchasesFinishedListener listener, final boolean includeAcknowledged);
     void consumePurchase(final String purchaseToken, final ConsumeResponseListener listener);
+    void acknowledgePurchase(final String purchaseToken, final AcknowledgePurchaseResponseListener listener);
     JSONObject purchaseToJSON(Purchase purchase);
 }
 

@@ -41,6 +41,9 @@ package com.freshplanet.ane.AirInAppPurchase {
 
         public static const RESTORE_INFO_RECEIVED:String = "RESTORE_INFO_RECEIVED";
         public static const RESTORE_INFO_ERROR:String = "RESTORE_INFO_ERROR";
+
+        public static const ACKNOWLEDGE_SUCCESSFUL:String = "ACKNOWLEDGE_SUCCESSFUL";
+        public static const ACKNOWLEDGE_ERROR:String = "ACKNOWLEDGE_ERROR";
 		
 		private var _data:String = null;
 

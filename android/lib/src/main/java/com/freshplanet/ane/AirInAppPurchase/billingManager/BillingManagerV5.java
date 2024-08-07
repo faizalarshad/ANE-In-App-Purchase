@@ -4,6 +4,8 @@ package com.freshplanet.ane.AirInAppPurchase.billingManager;
 import android.app.Activity;
 import android.util.Log;
 
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
@@ -125,17 +127,22 @@ public class BillingManagerV5 implements IBillingManager {
 
                             List<QueryProductDetailsParams.Product> subList = new ArrayList<>();
 
-                            for (String productId : skuSubsList) {
-                                subList.add(QueryProductDetailsParams.Product.newBuilder()
-                                        .setProductId(productId)
-                                        .setProductType(BillingClient.ProductType.SUBS)
-                                        .build());
-
+                            if(skuSubsList != null && skuSubsList.size() > 0) {
+                                for (String productId : skuSubsList) {
+                                    subList.add(QueryProductDetailsParams.Product.newBuilder()
+                                            .setProductId(productId)
+                                            .setProductType(BillingClient.ProductType.SUBS)
+                                            .build());
+                                            
+                                }
                             }
 
-                            QueryProductDetailsParams subParams = QueryProductDetailsParams.newBuilder()
-                                    .setProductList(subList)
-                                    .build();
+                            QueryProductDetailsParams subParams = null;
+                            if(subList.size() > 0) {
+                                subParams = QueryProductDetailsParams.newBuilder()
+                                        .setProductList(subList)
+                                        .build();
+                            }
 
                             getProductInfo(subParams, new GetProductInfoFinishedListener() {
                                 @Override
@@ -202,17 +209,21 @@ public class BillingManagerV5 implements IBillingManager {
                 try {
                     checkNotDisposed();
 
-                    _billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
-                        @Override
-                        public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> list) {
-                            if(billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                                listener.onGetProductInfoFinishedListener(list);
+                    if(params != null) {
+                        _billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
+                            @Override
+                            public void onProductDetailsResponse(BillingResult billingResult, List<ProductDetails> list) {
+                                if(billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                                    listener.onGetProductInfoFinishedListener(list);
+                                }
+                                else {
+                                    listener.onGetProductInfoFinishedListener(null);
+                                }
                             }
-                            else {
-                                listener.onGetProductInfoFinishedListener(null);
-                            }
-                        }
-                    });
+                        });
+                    } else {
+                        listener.onGetProductInfoFinishedListener(null);
+                    }
                 }
                 catch (Exception e) {
                     listener.onGetProductInfoFinishedListener(null);
@@ -490,6 +501,30 @@ public class BillingManagerV5 implements IBillingManager {
             public void run() {
                 BillingResult result = BillingResult.newBuilder().setDebugMessage("Service disconnected").setResponseCode(BillingClient.BillingResponseCode.ERROR).build();
                 listener.onConsumeResponse(result,result.getDebugMessage());
+            }
+        };
+
+        startServiceConnectionIfNeeded(executeOnConnectedService, executeOnDisconnectedService);
+    }
+
+    public void acknowledgePurchase(final String purchaseToken, final AcknowledgePurchaseResponseListener listener) {
+        Runnable executeOnConnectedService = new Runnable() {
+            @Override
+            public void run() {
+                checkNotDisposed();
+                AcknowledgePurchaseParams.Builder paramsBuilder = AcknowledgePurchaseParams.newBuilder()
+                        .setPurchaseToken(purchaseToken);
+
+
+                _billingClient.acknowledgePurchase(paramsBuilder.build(), listener);
+            }
+        };
+
+        Runnable executeOnDisconnectedService = new Runnable() {
+            @Override
+            public void run() {
+                BillingResult result = BillingResult.newBuilder().setDebugMessage("Service disconnected").setResponseCode(BillingClient.BillingResponseCode.ERROR).build();
+                listener.onAcknowledgePurchaseResponse(result);
             }
         };
 

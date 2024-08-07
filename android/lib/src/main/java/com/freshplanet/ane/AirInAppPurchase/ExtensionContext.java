@@ -26,6 +26,7 @@ import com.adobe.fre.FREArray;
 import com.adobe.fre.FREContext;
 import com.adobe.fre.FREFunction;
 import com.adobe.fre.FREObject;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingResult;
@@ -89,6 +90,9 @@ public class ExtensionContext extends FREContext {
 
     private static final String RESTORE_INFO_RECEIVED = "RESTORE_INFO_RECEIVED";
     private static final String RESTORE_INFO_ERROR = "RESTORE_INFO_ERROR";
+
+    private static final String ACKNOWLEDGE_SUCCESSFUL = "ACKNOWLEDGE_SUCCESSFUL";
+    private static final String ACKNOWLEDGE_ERROR = "ACKNOWLEDGE_ERROR";
 
     private SetupFinishedListener _initLibListener = new SetupFinishedListener() {
         @Override
@@ -158,6 +162,17 @@ public class ExtensionContext extends FREContext {
     };
 
 
+    private AcknowledgePurchaseResponseListener _acknowledgePurchaseResponseListener = new AcknowledgePurchaseResponseListener() {
+        @Override
+        public void onAcknowledgePurchaseResponse(BillingResult billingResult) {
+            if (billingResult.getResponseCode() ==  BillingClient.BillingResponseCode.OK) {
+                _dispatchEvent(ACKNOWLEDGE_SUCCESSFUL, "");
+            }
+            else {
+                _dispatchEvent(ACKNOWLEDGE_ERROR, billingResult.getDebugMessage());
+            }
+        }
+    };
 
     private QueryInventoryFinishedListener _getProductsInfoListener = new QueryInventoryFinishedListener() {
         @Override
@@ -404,6 +419,47 @@ public class ExtensionContext extends FREContext {
         }
     };
 
+    private FREFunction acknowledgePurchase = new BaseFunction() {
+        @Override
+        public FREObject call(FREContext ctx, FREObject[] args) {
+
+            if(_billingManager == null) {
+                _dispatchEvent(ACKNOWLEDGE_ERROR, "Not initialized");
+                return null;
+            }
+
+
+            String receipt = getStringFromFREObject(args[1]);
+            JSONObject receiptJson = null;
+            String signedData = null;
+            JSONObject signedDataJson = null;
+            String purchaseToken = null;
+
+            Log.d(TAG, "BillingManager acknowledgePurchase! "+receipt);
+
+            try {
+
+                receiptJson = new JSONObject(receipt);
+                signedData = receiptJson.getString("signedData");
+
+                if (signedData == null)
+                    throw new JSONException("null signedData");
+
+                signedDataJson = new JSONObject(signedData);
+                purchaseToken = signedDataJson.getString("purchaseToken");
+
+
+                _billingManager.acknowledgePurchase(purchaseToken, _acknowledgePurchaseResponseListener);
+
+            }
+            catch (JSONException jsonException) {
+                _dispatchEvent(ACKNOWLEDGE_ERROR, jsonException.getMessage());
+            }
+
+            return null;
+        }
+    };
+
     // --------------------------------------------------------------------------------------//
     //																						 //
     // 									 	FREContext SETUP								 //
@@ -437,6 +493,7 @@ public class ExtensionContext extends FREContext {
         functionMap.put("makeSubscription", makeSubscription);
         functionMap.put("restoreTransaction", restoreTransaction);
         functionMap.put("removePurchaseFromQueue", removePurchaseFromQueue);
+        functionMap.put("acknowledgePurchase", acknowledgePurchase);
 
         return functionMap;
     }

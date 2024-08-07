@@ -110,6 +110,19 @@ package com.freshplanet.ane.AirInAppPurchase {
          * @param productId
          * @param receipt
          */
+        public function acknowledgePurchase(productId:String, receipt:String):void {
+
+            if (!isSupported)
+                _dispatchEvent(InAppPurchaseEvent.CONSUME_ERROR, "InAppPurchase not supported");
+            else {
+                if (_isAndroid()) {
+                    _context.call("acknowledgePurchase", productId, receipt);
+                } else {
+                     _log("ERROR", "IOS doesn't have acknowledge");
+                }
+            }
+        }
+
         public function removePurchaseFromQueue(productId:String, receipt:String):void {
 
             if (!isSupported)
