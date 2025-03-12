@@ -38,7 +38,9 @@ You will need to add the following activities and permission in your application
         <manifest android:installLocation="auto">
             ...
 			<uses-permission android:name="com.android.vending.BILLING"/>
-
+			<application>
+				<activity android:name="com.android.billingclient.api.ProxyBillingActivity" android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+			</application>
         </manifest>
     ]]></manifestAdditions>
 </android>
